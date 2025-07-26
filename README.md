@@ -1,2 +1,2 @@
 # karaokefy
-karaokefy any song
+A tool to generate karaoke-ready versions of songs by extracting vocals and instrumentals.
