@@ -28,6 +28,7 @@ var/
 venv/
 env/
 ENV/
+karaokefy_venv/
 
 # PyInstaller
 *.manifest
@@ -60,5 +61,5 @@ coverage.xml
 .mypy_cache/
 .dmypy.json
 
-# Spleeter output
-output/ 
+# Demucs output
+output/
