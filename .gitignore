@@ -63,3 +63,5 @@ coverage.xml
 
 # Demucs output
 output/
+
+sample_audios/
