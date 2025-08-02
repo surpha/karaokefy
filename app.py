@@ -4,7 +4,7 @@ import threading
 import time
 import subprocess
 from pathlib import Path
-from karaokefy.download import download_song, is_yt_dlp_installed, search_youtube, get_video_details, get_multiple_video_details
+from karaokefy.download import download_song, is_yt_dlp_installed, search_youtube, get_video_details, get_multiple_video_details, test_yt_dlp_search
 from karaokefy.separate import separate_audio
 
 app = Flask(__name__)
@@ -122,18 +122,22 @@ def search_song():
     if not is_yt_dlp_installed():
         return jsonify({'error': 'yt-dlp is not installed. Please install it first.'})
     
+    # Test if yt-dlp search is working
+    if not test_yt_dlp_search():
+        return jsonify({'error': 'yt-dlp search functionality is not working. Please check your internet connection and try again.'})
+    
     try:
         # Search for multiple videos
         youtube_urls = search_youtube(song_name, max_results=5)
         
         if not youtube_urls:
-            return jsonify({'error': 'No videos found for your search query'})
+            return jsonify({'error': 'No videos found for your search query. Please try a different search term.'})
         
         # Get details for all videos
         video_details_list = get_multiple_video_details(youtube_urls, max_results=5)
         
         if not video_details_list:
-            return jsonify({'error': 'Could not retrieve video details'})
+            return jsonify({'error': 'Could not retrieve video details. Please try again.'})
         
         # Store search results for later use
         processing_status['search_results'] = video_details_list
