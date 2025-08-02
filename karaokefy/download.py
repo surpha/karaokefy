@@ -13,25 +13,56 @@ def search_youtube(song_name, max_results=5):
     Returns:
         list: List of YouTube URLs
     """
-    # Use yt-dlp to search and get multiple results
-    cmd = [
-        'yt-dlp',
-        '--get-id',
-        '--playlist-items', f'1-{max_results}',
-        f'ytsearch{max_results}:{song_name} audio'
+    # Try different search strategies
+    search_strategies = [
+        # Strategy 1: Direct search with audio filter
+        f'ytsearch{max_results}:{song_name} audio',
+        # Strategy 2: Direct search without audio filter
+        f'ytsearch{max_results}:{song_name}',
+        # Strategy 3: Search with quotes for exact match
+        f'ytsearch{max_results}:"{song_name}"',
+        # Strategy 4: Search with music filter
+        f'ytsearch{max_results}:{song_name} music'
     ]
     
+    for i, search_query in enumerate(search_strategies):
+        try:
+            cmd = [
+                'yt-dlp',
+                '--get-id',
+                '--playlist-items', f'1-{max_results}',
+                search_query
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            if result.returncode == 0 and result.stdout.strip():
+                video_ids = result.stdout.strip().split('\n')
+                urls = [f"https://www.youtube.com/watch?v={video_id}" for video_id in video_ids if video_id]
+                if urls:
+                    return urls
+            
+        except subprocess.TimeoutExpired:
+            continue
+        except Exception as e:
+            continue
+    
+    # If all strategies fail, try a simpler approach
     try:
+        cmd = [
+            'yt-dlp',
+            '--get-id',
+            '--playlist-items', '1',
+            f'ytsearch1:{song_name}'
+        ]
+        
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0 and result.stdout.strip():
-            video_ids = result.stdout.strip().split('\n')
-            return [f"https://www.youtube.com/watch?v={video_id}" for video_id in video_ids if video_id]
-        else:
-            raise RuntimeError(f"Failed to search YouTube: {result.stderr}")
-    except subprocess.TimeoutExpired:
-        raise RuntimeError("YouTube search timed out")
-    except Exception as e:
-        raise RuntimeError(f"Error searching YouTube: {str(e)}")
+            video_id = result.stdout.strip()
+            return [f"https://www.youtube.com/watch?v={video_id}"]
+    except:
+        pass
+    
+    raise RuntimeError(f"Could not find any videos for '{song_name}'. Please try a different search term.")
 
 def search_youtube_first(song_name):
     """
@@ -60,7 +91,7 @@ def get_video_details(youtube_url):
     ]
     
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
         if result.returncode == 0:
             lines = result.stdout.strip().split('\n')
             if len(lines) >= 5:
@@ -173,4 +204,17 @@ def is_yt_dlp_installed():
         result = subprocess.run(['yt-dlp', '--version'], capture_output=True, text=True)
         return result.returncode == 0
     except FileNotFoundError:
+        return False
+
+def test_yt_dlp_search():
+    """
+    Test if yt-dlp search functionality is working.
+    Returns:
+        bool: True if search works
+    """
+    try:
+        cmd = ['yt-dlp', '--get-id', 'ytsearch1:test']
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return result.returncode == 0 and result.stdout.strip()
+    except:
         return False 
