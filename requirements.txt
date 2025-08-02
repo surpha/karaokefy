@@ -1,2 +1,4 @@
 demucs==4.0.0
-click==8.1.7 
+click==8.1.7
+flask==3.0.0
+yt-dlp==2025.7.21 

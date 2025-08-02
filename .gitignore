@@ -30,6 +30,10 @@ env/
 ENV/
 karaokefy_venv/
 
+# macOS
+.DS_Store
+.DS_Store?
+
 # PyInstaller
 *.manifest
 *.spec
@@ -63,5 +67,14 @@ coverage.xml
 
 # Demucs output
 output/
+
+# Web app files
+downloads/
+*.pyc
+__pycache__/
+
+# Flask
+instance/
+.webassets-cache
 
 sample_audios/
